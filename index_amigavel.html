@@ -1,6 +1,3 @@
-# Criando nova versão do index_amigavel.html corrigida com caminho absoluto da API e tratamento de erros melhorado
-
-html_corrigido = """
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -89,7 +86,7 @@ html_corrigido = """
         <div id="result" class="result"></div>
         <div id="error" class="error"></div>
     </main>
-    <footer>© 2025 - Sistema Automático de Correção Selic</footer>
+    <footer>© 2025 - Sistema Automático de Correção Selic criado por @carolricciardi</footer>
 
     <script>
         async function uploadFile() {
@@ -131,11 +128,3 @@ html_corrigido = """
     </script>
 </body>
 </html>
-"""
-
-# Salvar arquivo HTML corrigido
-html_corrigido_path = '/mnt/data/index_amigavel_corrigido.html'
-with open(html_corrigido_path, 'w', encoding='utf-8') as f:
-    f.write(html_corrigido)
-
-html_corrigido_path
