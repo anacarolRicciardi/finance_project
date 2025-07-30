@@ -1,0 +1,141 @@
+# Criando nova versão do index_amigavel.html corrigida com caminho absoluto da API e tratamento de erros melhorado
+
+html_corrigido = """
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Automática de Selic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        main {
+            margin: 30px auto;
+            max-width: 500px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .steps {
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .upload-section {
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin-top: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .result {
+            margin-top: 15px;
+            font-weight: bold;
+            color: green;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>📊 Calculadora Automática da Taxa Selic</header>
+    <main>
+        <div class="steps">
+            <p>✅ <strong>Passo 1:</strong> Baixe o <a href="modelo_entrada_cliente.xlsx" download>modelo Excel</a> e preencha as colunas <b>Data</b> e <b>Valor Inicial</b>.</p>
+            <p>✅ <strong>Passo 2:</strong> Selecione o arquivo preenchido abaixo.</p>
+            <p>✅ <strong>Passo 3:</strong> Clique em "Calcular Selic" e baixe o resultado pronto.</p>
+        </div>
+
+        <div class="upload-section">
+            <input type="file" id="file" name="file" accept=".xlsx"/>
+            <br>
+            <button onclick="uploadFile()">📥 Calcular Selic</button>
+        </div>
+
+        <div id="result" class="result"></div>
+        <div id="error" class="error"></div>
+    </main>
+    <footer>© 2025 - Sistema Automático de Correção Selic</footer>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('file');
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            resultDiv.innerText = "";
+            errorDiv.innerText = "";
+
+            if (fileInput.files.length === 0) {
+                alert("Selecione um arquivo Excel primeiro.");
+                return;
+            }
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            resultDiv.innerText = "⏳ Processando, aguarde...";
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/upload_excel/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = 'resultado_selic.xlsx';
+                    link.click();
+                    resultDiv.innerText = "✅ Arquivo processado com sucesso!";
+                } else {
+                    const text = await response.text();
+                    errorDiv.innerText = "❌ Erro ao processar o arquivo: " + text;
+                }
+            } catch (err) {
+                errorDiv.innerText = "❌ Falha ao conectar com a API. Verifique se o servidor está ativo.";
+            }
+        }
+    </script>
+</body>
+</html>
+"""
+
+# Salvar arquivo HTML corrigido
+html_corrigido_path = '/mnt/data/index_amigavel_corrigido.html'
+with open(html_corrigido_path, 'w', encoding='utf-8') as f:
+    f.write(html_corrigido)
+
+html_corrigido_path
