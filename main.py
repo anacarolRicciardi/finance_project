@@ -40,27 +40,36 @@ async def upload_excel(file: UploadFile):
         url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados?formato=json"
         data = requests.get(url, timeout=10).json()
         selic = pd.DataFrame(data)
+
+        # Conversão de data
         selic['data'] = pd.to_datetime(selic['data'], format='%d/%m/%Y')
-        selic['valor'] = selic['valor'].str.replace(',', '.').astype(float)
 
-        # Validar colunas
-        if 'Data' not in df.columns or 'Valor Inicial' not in df.columns:
-            return {"error": "O arquivo Excel deve conter as colunas: Data e Valor Inicial"}
+        # Opcional: filtrar apenas anos recentes
+        selic = selic[selic['data'] >= '2020-01-01']
 
-        # Processar datas
-        df['Data'] = pd.to_datetime(df['Data'], dayfirst=True)
+        # Agrupar por mês
+        selic['ano_mes'] = selic['data'].dt.to_period('M')
+        selic_mes = selic.groupby('ano_mes').last().reset_index()
 
-        # Mesclar por mês
-        df_merged = df.merge(selic, left_on=df['Data'].dt.to_period('M'),
-                             right_on=selic['data'].dt.to_period('M'), how='left')
+        # Criar coluna ano-mês no arquivo Excel
+        df['ano_mes'] = df['Data'].dt.to_period('M')
+
+        # Merge com a taxa correta
+        df_merged = df.merge(selic_mes, left_on='ano_mes', right_on='ano_mes', how='left')
         df_merged = df_merged.rename(columns={'valor': 'Taxa Selic Anual (%)'})
 
-        # Calcular taxa mensal efetiva composta
+        # ============================
+        # Calcular taxa mensal composta
+        # ============================
         taxa_anual = df_merged['Taxa Selic Anual (%)'] / 100
-        taxa_mensal = (1 + taxa_anual)**(1/12) - 1
+        taxa_mensal = (1 + taxa_anual) ** (1 / 12) - 1
 
         # Calcular valor atualizado
         df_merged['Valor Atualizado'] = df_merged['Valor Inicial'] * (1 + taxa_mensal)
+
+        # Formatar resultado
+        df_merged['Valor Atualizado'] = df_merged['Valor Atualizado'].round(2)
+        df_merged['Taxa Selic Anual (%)'] = df_merged['Taxa Selic Anual (%)'].round(2)
 
         # Exportar Excel
         output = BytesIO()
