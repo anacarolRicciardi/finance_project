@@ -108,7 +108,7 @@ html_corrigido = """
             resultDiv.innerText = "⏳ Processando, aguarde...";
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/upload_excel/', {
+                const response = await fetch('https://finance-project-yxwc.onrender.com/upload_excel/', {
                     method: 'POST',
                     body: formData
                 });
